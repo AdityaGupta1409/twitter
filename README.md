@@ -1,102 +1,87 @@
-# Dialogflow Integration
+# Twitter Integration
 
-## Introduction
+## Setup
 
-The purpose of this documentation is to set up an integration deployment to connect your existing Dialogflow agent to various third party chat service platforms.
+### Prerequisites
 
-If you do not have an existing Dialogflow agent, you can set one up by reading the documentation [here](https://cloud.google.com/dialogflow/docs/).
+- Follow the instructions on the [main README file](https://github.com/GoogleCloudPlatform/dialogflow-integrations#readme) in the root directory of this repository.
+- Create a [Twitter Developer account](http://developer.twitter.com/en/apply/user).
+- Replace the value of __projectId__ in the [server.js file](https://github.com/GoogleCloudPlatform/dialogflow-integrations/blob/03676af04840c21c12e2590393d5542602591bee/twitter/server.js#L40) with your Dialogflow agent’s Project ID.
 
-Although it is possible to set up this integration deployment on any hosting platform, these instructions will use [Google's Cloud Run](https://cloud.google.com/run/).
+### Creating an App in Twitter
 
-## Initial Setup
+- Log in to your Twitter Developer account and proceed to the [Twitter App Management Console](https://developer.twitter.com/en/apps) by clicking on your username to open the dropdown menu and then clicking on "Apps".
+- Click on the "Create New App" button. 
+- Fill out the required fields and click "Create".
 
-### Setting up gcloud CLI
+### Obtaining Twitter Credentials
 
-The deployment process for GCP Cloud Run via this README utilizes gcloud CLI commands. Follow the steps below to set up gcloud CLI locally for this deployment.
+- In the [Twitter App Management Console](https://developer.twitter.com/en/apps), 
+click the  "Details" button on the new project. 
+- Go to the "Permissions" tab and click the "Edit" button. 
+- Set "Access permission" to "Read, write and Direct Messages" and click "Save".
 
-1. On the gcloud CLI [documentation page](https://cloud.google.com/sdk/docs/quickstarts), select your OS and follow the instructions for the installation. 
-2. Run ``gcloud config get-value project`` to check the GCP Project configured. 
-3. Go into the Dialogflow agent’s settings and check the Project ID associated with the agent. The GCP Project configured in the gcloud CLI should match the agent’s Project ID.
-4. If the project IDs do not match, run ``gcloud config set project PROJECT-ID``, replacing PROJECT-ID with the Project ID from step 3. 
+![alt text](images/twitter-obtain-twitter-credentials-1.png)
 
-### Service Account Setup (GCP)
+- Go to the "Keys and tokens" tab in your App details. 
+- Click "Create" under "Access token & access token secret". 
+- Take the values for __API key__, __API secret key__, __Access token__, and __Access token secret__ and replace the values for __twitterAPIKey__, __twitterSecretAPIKey__, __twitterAccessToken__, and __twitterSecretAccessToken__ in the [server.js file](https://github.com/GoogleCloudPlatform/dialogflow-integrations/blob/03676af04840c21c12e2590393d5542602591bee/twitter/server.js#L35-L38) respectively.
 
-For the integration to function properly, it is necessary to create a Service Account in your agent’s GCP Project. See [this page](https://cloud.google.com/dialogflow/docs/quick/setup#sa-create) of the documentation for more details. 
+![alt text](images/twitter-obtain-twitter-credentials-2.png)
 
-Follow the steps below to create a Service Account and set up the integration. 
+- Confirm that the "Access level" for the "Access token & access token secret" is "Read, write, and Direct Messages". 
 
-1. Go into the Dialogflow agent’s settings and click on the Project ID link to open its associated GCP Project.
-2. Click on the navigation menu in the GCP console, hover over "IAM & admin", and click "Service accounts". 
-3. Click on "+ CREATE SERVICE ACCOUNT", fill in the details, and give it the "Dialogflow Client API" role.
-4. Click on "+ Create Key" and download the resulting JSON key file. 
-5. Save the JSON key file in the desired platform subdirectory. 
+### Creating a Dev Environment
 
-If deploying this integration outside of GCP Cloud Run, it may be necessary to set the GOOGLE_APPLICATION_CREDENTIALS environmental variable on the deployment environment to the absolute path of Service Account JSON key file. See [this guide](https://cloud.google.com/dialogflow/docs/quick/setup#auth) for details.
+- Log in to your Twitter developer account and go to the [Dev environments page](https://developer.twitter.com/en/account/environments) by clicking on your username to open the dropdown menu and then clicking on "Dev environments". 
+- In the "Account Activity API / Sandbox" section, click the "Set up dev environment" button. 
+- Fill out the appropriate details and click "Complete setup".
+- Take the value of __Dev environment label__ and replace the value for __environmentName__ in the [server.js file](https://github.com/GoogleCloudPlatform/dialogflow-integrations/blob/03676af04840c21c12e2590393d5542602591bee/twitter/server.js#L41).
 
-## Deploying the Integration
+![alt text](images/twitter-creating-a-dev-environment.png)
 
-### Setup
+### Deploying the Integration Using Cloud Run
 
-1. Go into the Dialogflow agent’s settings and click on the Project ID link to open its associated GCP Project.
-2. Click on the navigation menu in the GCP console and click "Billing". Set up and enable billing for the project. 
-3. Enable Cloud Build and Cloud Run API for the project
-[here](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com,run.googleapis.com).
-4. Clone this git repository onto your local machine or development environment:
-`git clone [repository url]`
-5. Open the root directory of the repository on your local machine or development environment.
+In your local terminal, change the active directory to the repository’s root directory.
 
-### Dockerfile and Creating the Build
-
-Open the [Dockerfile](https://github.com/GoogleCloudPlatform/dialogflow-integrations/blob/03676af04840c21c12e2590393d5542602591bee/Dockerfile#L9) in the root directory of the repository, and change YOUR_INTEGRATION in the following line to the name of the desired platform subdirectory.
-
-```Dockerfile
-   # Set this environmental variable to the integration you want to use
-   ENV INTEGRATION=YOUR_INTEGRATION
-   ```
-
-If you have not done so already, copy your Service Account JSON key file to the desired platform subdirectory. 
-
-### Platform-specific Instructions
-
-The integration requires platform credentials from the intended platform to function properly. 
-
-Follow the steps in the README file in the relevant platform subdirectory to obtain the credentials and setup the server.js file to deploy and start the integration:
-
-- [CM.com (SMS and WhatsApp Business)](./cm/README.md)
-- [Kik](https://github.com/GoogleCloudPlatform/dialogflow-integrations/tree/master/kik#readme)
-- [Skype](https://github.com/GoogleCloudPlatform/dialogflow-integrations/tree/master/skype#readme)
-- [Spark](https://github.com/GoogleCloudPlatform/dialogflow-integrations/tree/master/spark#readme)
-- [Twilio IP Messaging](https://github.com/GoogleCloudPlatform/dialogflow-integrations/tree/master/twilio-ip#readme)
-- [Twilio (Text Messaging)](https://github.com/GoogleCloudPlatform/dialogflow-integrations/tree/master/twilio#readme)
-- [Twitter](https://github.com/GoogleCloudPlatform/dialogflow-integrations/tree/master/twitter#readme)
-- [Viber](https://github.com/GoogleCloudPlatform/dialogflow-integrations/tree/master/viber#readme)
-
-## Post-deployment
-
-### Shutting Down an Integration
-
-In order to shut down an integration set up via the steps in this README, only deleting the Cloud Run service is required.
-
-In your local terminal, run the following command and select the previously chosen target platform to list active deployments:
+Run the following command to save the state of your repository into [GCP Container Registry](https://console.cloud.google.com/gcr/). Replace PROJECT-ID with your agent’s GCP Project ID and PLATFORM with the platform subdirectory name.
 
 ```shell
-gcloud beta run services list
+gcloud builds submit --tag gcr.io/PROJECT-ID/dialogflow-PLATFORM
 ```
 
-Then run the following command, replacing SERVICE-NAME with the name of the service you want to shut down, and select the same settings chosen when deploying in order to shut down the deployment. 
+Deploy your integration to live using the following command. Replace PROJECT-ID with your agent’s GCP project Id, PLATFORM with the platform subdirectory name, and YOUR_KEY_FILE with the name (not path) of your Service Account JSON key file.
 
 ```shell
-gcloud beta run services delete SERVICE-NAME
+gcloud beta run deploy --image gcr.io/PROJECT-ID/dialogflow-PLATFORM --update-env-vars GOOGLE_APPLICATION_CREDENTIALS=YOUR_KEY_FILE --memory 1Gi
 ```
 
-If following the instructions closely, SERVICE-NAME should be in the format of dialogflow-PLATFORM
+- When prompted for a target platform, select a platform by entering the corresponding number (for example, ``1`` for ``Cloud Run (fully managed)``).
+ - When prompted for a region, select a region (for example, ``us-central1``).
+ - When prompted for a service name, hit Enter to accept the default.
+ - When prompted to allow unauthenticated invocations, press ``y``.
+ - Copy the URL given to you and use it according to the README file in the
+ given integration's folder.
 
-### Multiple Integrations
+Take the value for the server URL printed in the console after the completion of the execution of the above command and replace the value for __targetUrl__ in the [server.js file](https://github.com/GoogleCloudPlatform/dialogflow-integrations/blob/03676af04840c21c12e2590393d5542602591bee/twitter/server.js#L39). 
 
-To set up multiple integration deployments simultaneously, repeat all of the instructions for each deployment. While it is possible to make changes to the existing deployment repository and re-deploy it under a different name, it would make it difficult to retroactively make changes to previous deployments.
+Redeploy the integration with the updated change by rerunning the above two commands. 
 
-### Changing Integration Behavior
+More information can be found in Cloud Run
+[documentation](https://cloud.google.com/run/docs/deploying).
 
-The behavior of an integration can be customized via the addition of your own developer code or by editing the server.js file in the platform subdirectory.
+You can view a list of your active integration deployments under [Cloud Run](https://console.cloud.google.com/run) in the GCP Console.
 
-After making changes, redeploy the deployment by re-running the commands as specified in the "Deploy the Integration Using Cloud Run" section of the platform-specific integration READMEs.
+## Potential Issues
+
+### Duplicate Tweets
+
+Twitter will block any duplicate tweets. So your Twitter bot may be prevented from retweeting a person if they are triggering the same response multiple times.
+
+### Cloud Run 504 Error
+
+Cloud Run will return 504 errors after Twitter receives a message. Do not be concerned. These messages appear because of the way the Twitter integration returns messages, not because there are any actual issues.
+
+### Cloud Run Multiple Instances on Startup
+
+Cloud Run will sometimes create multiple instances at startup due to a GET request from Twitter during the startup process. This will cause some delay to the startup process but will not cause any other issues.
